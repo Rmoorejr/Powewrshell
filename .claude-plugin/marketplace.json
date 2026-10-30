@@ -1,0 +1,11 @@
+{
+  "name": "powewrshell",
+  "owner": { "name": "rmoorejr" },
+  "plugins": [
+    {
+      "name": "context-band",
+      "source": "./context-band",
+      "description": "Live context usage band above the prompt"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "powewrshell": {
+      "source": { "source": "github", "repo": "rmoorejr/powewrshell" }
+    }
+  },
+  "enabledPlugins": {
+    "context-band@powewrshell": true
+  }
+}
