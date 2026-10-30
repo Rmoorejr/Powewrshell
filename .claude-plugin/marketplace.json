@@ -1,0 +1,11 @@
+{
+  "name": "powewrshell",
+  "owner": { "name": "rmoorejr" },
+  "plugins": [
+    {
+      "name": "context-band",
+      "source": "./context-band",
+      "description": "Context window fill and session cost in a band above the prompt; /context-band toggles it"
+    }
+  ]
+}
