@@ -4,6 +4,7 @@ import type { Register, EngineInterface } from 'claude-code'
 import type { Usage } from '../types'
 
 const usage = atom({ plugin: 'context-band', key: 'usage' } as const, null)
+const isHidden = atom({ plugin: 'context-band', key: 'isHidden' } as const, false)
 
 const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : `${n}`)
 
@@ -17,9 +18,20 @@ async function refresh($: EngineInterface) {
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
+    await $.command.register({
+      name: 'context-band',
+      description: 'Turn the context band on or off (/context-band on, /context-band off)',
+    })
     const result = await next(e)
     await refresh($).catch(() => undefined)
     return result
+  })
+
+  on('command.run', { command: 'context-band' }, async ($, e) => {
+    const arg = e.args.trim().toLowerCase()
+    const hidden = await update($, isHidden, was => (arg === 'on' ? false : arg === 'off' ? true : !was))
+    await refresh($).catch(() => undefined)
+    return { text: hidden ? 'Context band: OFF' : 'Context band: ON' }
   })
 
   on('tool.call', async ($, e, next) => {
@@ -43,7 +55,7 @@ export const register: Register = on => {
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const u = await read($, usage)
 
-    if (e.props.hasSurvey || u === null || u.window === 0) {
+    if (e.props.hasSurvey || u === null || u.window === 0 || (await read($, isHidden))) {
       return next(e)
     }
 
