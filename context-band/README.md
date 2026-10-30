@@ -30,4 +30,13 @@ In the desktop app, where `/plugin` does not run: click + next to the prompt box
 
 If the repository is private, the install needs a git credential for github.com on that machine (an SSH key, or `gh auth login` then `gh auth setup-git`).
 
-Cloud sessions opened on this repository pick it up from `.claude/settings.json` with no install step.
+### Cloud sessions
+
+`.claude/settings.json` enables the plugin for this repo, but cloud sessions start without the prompt that installs a repo's plugins, so it never loads there on its own. Install it from the environment's setup script instead, which runs before Claude Code starts. Open the cloud environment menu in the session title bar, then Edit, and add to Setup script:
+
+```
+claude plugin marketplace add rmoorejr/powewrshell
+claude plugin install context-band@powewrshell --scope user
+```
+
+New sessions on that environment get the band hooks and `/context-band`. The band itself draws above the terminal prompt, so the Claude app may not show it.
