@@ -1,12 +1,12 @@
 # context-band
 
-A band above the Claude Code prompt that shows how full the context window is, plus what the session has cost so far:
+A live band above the Claude Code prompt showing how much of the context window is used and how much is left:
 
 ```
-ctx ██████░░░░░░░░░░░░░░ 34%  68k / 200k  $1.42
+██████░░░░░░░░░░░░░░ 34%  68.0k used · 132.0k left of 200.0k
 ```
 
-Green under 60%, yellow from 60%, red from 85% (time to compact). It updates whenever the context fill or the cost changes. Type `/context-band` to hide it or bring it back.
+Green under 60%, yellow from 60%, red from 85% (time to compact). It refreshes after every tool call, turn, compaction and at session start.
 
 ## Install
 

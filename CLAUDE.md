@@ -16,5 +16,5 @@ Once files are added, update this document with:
 
 ## Plugins
 
-- `context-band/` is a Claude Code mod (hooks module in `hooks/register.tsx`) listed in `.claude-plugin/marketplace.json`. Validate with `claude plugin validate context-band`.
+- `context-band/` is a Claude Code mod (hooks module in `hooks/register.tsx`, same code as the band built in the 10/30 "Context bar" session) listed in `.claude-plugin/marketplace.json`. Validate with `claude plugin validate context-band`.
 - `.claude/settings.json` enables it for sessions opened on this repo.

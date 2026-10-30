@@ -1,7 +1,7 @@
-export type Reading = { tokens?: number; window: number; percent?: number; usd?: number }
+export type Usage = { tokens: number; window: number; percent: number }
 
 declare module 'claude-code' {
   interface PluginState {
-    'context-band': { reading: Reading | null; isHidden: boolean }
+    'context-band': { usage: Usage | null }
   }
 }

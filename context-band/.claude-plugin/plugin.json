@@ -1,1 +1,1 @@
-{ "name": "context-band", "version": "0.1.0", "description": "Context window fill and session cost in a band above the prompt; /context-band toggles it", "types": "./types/index.d.ts" }
+{ "name": "context-band", "version": "0.1.0", "description": "Live context usage band above the prompt", "types": "./types/index.d.ts" }

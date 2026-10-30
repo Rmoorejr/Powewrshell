@@ -1,61 +1,62 @@
 import { atom, read, update } from 'claude-code'
-import type { Register } from 'claude-code'
+import type { Register, EngineInterface } from 'claude-code'
 
-import type { Reading } from '../types'
+import type { Usage } from '../types'
 
-const reading = atom({ plugin: 'context-band', key: 'reading' } as const, null)
-const isHidden = atom({ plugin: 'context-band', key: 'isHidden' } as const, false)
+const usage = atom({ plugin: 'context-band', key: 'usage' } as const, null)
 
-const WIDTH = 20
+const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : `${n}`)
 
-const compact = (n: number) =>
-  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`
+async function refresh($: EngineInterface) {
+  const { context } = await $.session.usage()
+  const tokens = context.tokens ?? 0
+  const percent = context.percent ?? (context.window ? Math.round((tokens / context.window) * 100) : 0)
+  const value: Usage = { tokens, window: context.window, percent }
+  await update($, usage, () => value)
+}
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    await $.command.register({
-      name: 'context-band',
-      description: 'Toggle the context usage band above the prompt',
-    })
-    const { context, cost } = await $.session.usage()
-    await update($, reading, () => ({ ...context, usd: cost?.usd }))
-
-    return next(e)
+    const result = await next(e)
+    await refresh($).catch(() => undefined)
+    return result
   })
 
-  on('command.run', { command: 'context-band' }, async $ => {
-    const hidden = await update($, isHidden, was => !was)
-
-    return { text: hidden ? 'Context band hidden.' : 'Context band shown.' }
+  on('tool.call', async ($, e, next) => {
+    const result = await next(e)
+    await refresh($).catch(() => undefined)
+    return result
   })
 
-  on('session.measure', async ($, e, next) => {
-    const next_: Reading = { ...e.context, usd: e.cost?.usd }
-    await update($, reading, () => next_)
+  on('turn.complete', async ($, e, next) => {
+    const result = await next(e)
+    await refresh($).catch(() => undefined)
+    return result
+  })
 
-    return next(e)
+  on('session.compact', async ($, e, next) => {
+    const result = await next(e)
+    await refresh($).catch(() => undefined)
+    return result
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    const r = await read($, reading)
-    if (e.props.hasSurvey || r === null || (await read($, isHidden))) {
+    const u = await read($, usage)
+
+    if (e.props.hasSurvey || u === null || u.window === 0) {
       return next(e)
     }
 
     const { Box, Text } = $.ui.resolve(e)
-    const pct = r.percent ?? 0
-    const filled = Math.round((pct / 100) * WIDTH)
-    const color = pct >= 85 ? 'red' : pct >= 60 ? 'yellow' : 'green'
-    const used = r.tokens === undefined ? 'waiting for first response' : `${compact(r.tokens)} / ${compact(r.window)}`
-    const cost = r.usd === undefined ? '' : `  $${r.usd.toFixed(2)}`
+    const left = Math.max(u.window - u.tokens, 0)
+    const color = u.percent >= 85 ? 'red' : u.percent >= 60 ? 'yellow' : 'green'
+    const filled = Math.round(u.percent / 5)
+    const bar = '█'.repeat(filled) + '░'.repeat(20 - filled)
 
     return (
       <Box>
-        <Text dimColor>ctx </Text>
-        <Text color={color}>{'█'.repeat(filled)}</Text>
-        <Text dimColor>{'░'.repeat(WIDTH - filled)}</Text>
-        <Text color={color}> {r.percent === undefined ? '--' : `${pct}%`}</Text>
-        <Text dimColor>  {used}{cost}</Text>
+        <Text color={color}>{bar} {u.percent}%</Text>
+        <Text dimColor>  {fmt(u.tokens)} used · {fmt(left)} left of {fmt(u.window)}</Text>
       </Box>
     )
   })
