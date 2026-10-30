@@ -8,6 +8,8 @@ A live band above the Claude Code prompt showing how much of the context window 
 
 Green under 60%, yellow from 60%, red from 85% (time to compact). It refreshes after every tool call, turn, compaction and at session start.
 
+`/context-band off` hides it, `/context-band on` brings it back, and `/context-band` alone flips it.
+
 ## Install
 
 At the prompt of a terminal session:
